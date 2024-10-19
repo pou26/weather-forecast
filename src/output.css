@@ -174,6 +174,7 @@ body {
   /* 1 */
   line-height: inherit;
   /* 2 */
+  
 }
 
 /*
@@ -185,7 +186,7 @@ body {
 hr {
   height: 0;
   /* 1 */
-  color: inherit;
+  
   /* 2 */
   border-top-width: 1px;
   /* 3 */
@@ -1063,19 +1064,34 @@ video {
   .md\:w-\[400px\] {
     width: 400px;
   }
+
 }
 
 @media (min-width: 1024px) {
   .lg\:w-\[500px\] {
     width: 500px;
   }
+  .forecast-content{
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+  }
+  .temperature{
+    font-size: 80px;
+  }
 }
 
 
 /* Media Queries for Responsive Design */
 @media (max-width: 640px) {
-    #wrapper {
-        padding: 0rem; /* Add padding for smaller screens */
+  /* body{
+    height: 100vh;
+  } */
+    .wrapper {
+        margin:0; 
+        
     }
     .forecast-content {
         min-width: 120px; /* Adjust width for smaller screens */
@@ -1084,27 +1100,25 @@ video {
         width: 100%; /* Ensure search bar takes full width */
     }
     #weather-wrap{
-      height:100px;
-      
+      height:90px;
+      width:90%;
     }
 
 }
 
-@media (min-width: 641px) {
+@media (min-width: 641px) and (max-width: 1024px) {
+  body{
+    height: 100vh;
+  }
     .forecast-content {
         min-width: 300px;
         min-height:300px; /* Minimum width for larger screens */
     }
 }
-@media (max-width: 768px) {
-  #wrapper {
-      height:100vh; /* Add padding for larger screens */
-  }
-}
 
 
 @media (min-width: 768px) {
-    #wrapper {
+    .wrapper {
         padding: 2rem; /* Add padding for larger screens */
     }
 }

@@ -1,0 +1,121 @@
+const cityInput = document.querySelector(".city-input");
+const searchButton = document.querySelector(".search-btn");
+const weatherCardsDiv = document.querySelector(".forecast-slides");
+const locationName = document.querySelector(".location-header");
+const currentDate = document.querySelector(".date");
+const temperatureDiv = document.querySelector(".temperature");
+const weatherImage = document.querySelector(".image");
+const temperatureTextDiv = document.querySelector(".temperature-text");
+
+const API_KEY = "e3251a9dc65207fd010c946b91e43f78"; // Weather API key
+
+// Function to format the date from YYYY-MM-DD to DD-MM-YYYY
+const formatDate = (dateString) => {
+    const dateParts = dateString.split(" ")[0].split("-"); // Split the date part
+    return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`; // Rearrange to DD-MM-YYYY
+};
+
+// Function to display location name
+const getLocationName = (data) => {
+    return `<div id="heading" class="flex items-center space-x-2">
+                <h1 class="text-purple-800 font-bold text-xl font-serif">${data.name}</h1>
+            </div>`;
+};
+
+// Function to display current date
+const getCurrentDate = (weatherItem) => {
+    const formattedDate = formatDate(weatherItem.dt_txt); // Use the reusable date formatter
+    return `<div id="date" class="date text-center text-white">
+                ${formattedDate}
+            <h3 class="temperature text-7xl font-bold text-purple-700 text-center">${Math.round(weatherItem.main.temp)}°</h3> 
+            <img src="https://openweathermap.org/img/wn/${weatherItem.weather[0].icon}@2x.png" alt="Weather Icon"/>
+             
+        </div>
+        `;
+};
+
+
+
+// Function to get weather details using latitude and longitude
+const getWeatherDetails = (cityName, lat, lon) => {
+    const WEATHER_API_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`;
+
+    fetch(WEATHER_API_URL)
+        .then(res => res.json())
+        .then(data => {
+            console.log("Weather data:", data); // Log the weather data for debugging
+
+            const uniqueForecastDays = [];
+
+            // Filter the forecasts to get 5 days forecast
+            const fiveDayForecast = data.list.filter(forecast => {
+                const forecastDate = new Date(forecast.dt_txt).getDate();
+                if (uniqueForecastDays.length < 5 && !uniqueForecastDays.includes(forecastDate)) {
+                    uniqueForecastDays.push(forecastDate);
+                    return true; // Return true to include this forecast
+                }
+                return false; // Exclude this forecast
+            });
+
+            // Clear the previous input and content
+            cityInput.value = "";
+            weatherCardsDiv.innerHTML = "";
+            locationName.innerHTML = getLocationName({ name: cityName });
+            currentDate.innerHTML = getCurrentDate(fiveDayForecast[0]); // Use the first forecast item for the current date
+            // temperatureDiv.innerHTML = getCurrentDate(fiveDayForecast[0]);
+            // weatherImage.innerHTML = getCurrentDate(fiveDayForecast[0]);
+
+            // Update the temperature, weather image, and description
+            updateCurrentWeather(fiveDayForecast[0]);
+
+            // Create and insert weather cards for the 5-day forecast
+            fiveDayForecast.forEach(weatherItem => {
+                const cardHTML = createWeatherCard(weatherItem);
+                weatherCardsDiv.insertAdjacentHTML("beforeend", cardHTML);
+            });
+
+            // Check if weather cards are created
+            console.log("Weather cards added:", fiveDayForecast.length); // Log the count of weather cards added
+        })
+        .catch(() => {
+            alert("An error occurred while fetching weather forecast");
+        });
+};
+
+
+
+// Function to create weather cards for 5 days forecast
+const createWeatherCard = (weatherItem) => {
+    const formattedDate = formatDate(weatherItem.dt_txt); // Use the reusable date formatter
+    return `<div class="forecast-content bg-white bg-opacity-30 text-purple-600 rounded-3xl p-4 w-[130px] flex-shrink-0">
+                <h3>(${formattedDate})</h3>
+                <img src="https://openweathermap.org/img/wn/${weatherItem.weather[0].icon}@2x.png" alt="Weather Icon"/>
+                <p>${Math.round(weatherItem.main.temp)}°</p>
+                <p class="forecast-humidity">${weatherItem.main.humidity}%</p>
+                <p class="forecast-wind">${weatherItem.wind.speed} M/S</p>
+            </div>`;
+};
+
+// Function to fetch city coordinates based on city name
+const getCityCoordinates = (e) => {
+    e.preventDefault(); // Prevent form submission from refreshing the page
+    const cityName = cityInput.value.trim();
+    if (!cityName) return;
+
+    const GEOCODING_API_URL = `https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${API_KEY}`;
+
+    // Fetch city coordinates from the API response (name, latitude, longitude)
+    fetch(GEOCODING_API_URL)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.length) return alert(`No results found for ${cityName}`);
+            const { name, lat, lon } = data[0];
+            getWeatherDetails(name, lat, lon);
+        })
+        .catch(() => {
+            alert("An error occurred while fetching city coordinates");
+        });
+};
+
+// Attach event listener to the search button
+searchButton.addEventListener("click", getCityCoordinates);
