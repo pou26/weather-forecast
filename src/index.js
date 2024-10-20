@@ -1,20 +1,26 @@
 const cityInput = document.querySelector(".city-input");
 const searchButton = document.querySelector(".search-btn");
+const currentLocationButton = document.querySelector(".current-location button");
 const weatherCardsDiv = document.querySelector(".forecast-slides");
 const locationName = document.querySelector(".location-header");
 const currentDate= document.querySelector(".date");
 const temperatureDiv = document.querySelector(".temperature");
 const weatherImage = document.querySelector(".image");
 const temperatureTextDiv = document.querySelector(".temperature-text");
+const dropdownMenu = document.querySelector(".recent-cities-dropdown");
+
 
 
 const API_KEY = "e3251a9dc65207fd010c946b91e43f78";  //weather api key
+const MAX_RECENT_CITIES = 5; // Limit the number of recent cities
 
 // Function to format the date from YYYY-MM-DD to DD-MM-YYYY
 const formatDate = (dateString) => {
     const dateParts = dateString.split(" ")[0].split("-");  // Split the date part
     return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`; // Rearrange to DD-MM-YYYY
 };
+
+
 
 //location name
 const getLocationName=(data)=>{
@@ -67,7 +73,7 @@ const updateCurrentWeather = (weatherItem) => {
 //5 days weather card
 const createWeatherCard = (weatherItem) => {
     const formattedDate = formatDate(weatherItem.dt_txt);  // Use the reusable date formatter
-    return `    <div class="forecast-content bg-white bg-opacity-30 text-purple-600 rounded-3xl p-4 w-[130px] flex-shrink-0">
+    return `    <div class="forecast-content text-white rounded-3xl p-4 w-[130px] flex-shrink-0">
                     <h3>(${formattedDate})</h3>
                     <img src="https://openweathermap.org/img/wn/${weatherItem.weather[0].icon}@2x.png" alt="Weather Icon"/>
                     <p>${weatherItem.main.temp}°</p>
@@ -77,6 +83,70 @@ const createWeatherCard = (weatherItem) => {
 };
 
 
+// Add city to local storage for recently searched cities
+const addCityToRecentSearches = (cityName) => {
+    let recentCities = JSON.parse(localStorage.getItem('recentCities')) || [];
+    
+    if (!recentCities.includes(cityName)) {
+        recentCities.unshift(cityName);  // Add the city to the beginning of the array
+        if (recentCities.length > MAX_RECENT_CITIES) {
+            recentCities.pop();  // Remove the oldest city if more than MAX_RECENT_CITIES
+        }
+        localStorage.setItem('recentCities', JSON.stringify(recentCities));
+    }
+};
+
+// Function to populate the dropdown with recently searched cities
+const populateDropdown = () => {
+    dropdownMenu.innerHTML = '';  // Clear existing dropdown content
+    const recentCities = JSON.parse(localStorage.getItem('recentCities')) || [];
+
+    if (recentCities.length) {
+        recentCities.forEach(city => {
+            const cityElement = document.createElement('li');
+            cityElement.textContent = city;
+            cityElement.classList.add("recent-city-item");
+            cityElement.addEventListener("click", () => {
+                getCityCoordinatesFromDropdown(city);  // Fetch weather for the selected city
+            });
+            dropdownMenu.appendChild(cityElement);
+        });
+    }
+};
+
+// Handle city selection from dropdown
+const getCityCoordinatesFromDropdown = (cityName) => {
+    cityInput.value = cityName;  // Set the input value to the selected city
+    getCityCoordinates();  // Fetch weather for the selected city
+};
+
+// Function to fetch city coordinates
+const getCityCoordinates = (e) => {
+    if (e) e.preventDefault();  // Prevent form submission from refreshing the page
+    const cityName = cityInput.value.trim();
+    if (!cityName) return;
+
+    const GEOCODING_API_URL = `https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${API_KEY}`;
+    
+    // Fetch entered city coordinates from API response (name, latitude, longitude)
+    fetch(GEOCODING_API_URL)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.length) return alert(`Nothing found for ${cityName}`);
+            const { name, lat, lon } = data[0];
+            getWeatherDetails(name, lat, lon);
+
+            // Add city to recently searched cities
+            addCityToRecentSearches(name);
+            populateDropdown();  // Update the dropdown with new city
+        })
+        .catch(() => {
+            alert("An error occurred while fetching city coordinates");
+        });
+};
+
+// Initial call to populate dropdown on page load
+populateDropdown();
 
 
 // Function to fetch weather details using lat, lon
@@ -117,25 +187,60 @@ const getWeatherDetails = (cityName, lat, lon) => {
 };
 
 // Function to fetch city coordinates
-const getCityCoordinates = (e) => {
-    e.preventDefault();  // Prevents form submission from refreshing the page
-    const cityName = cityInput.value.trim();
-    if (!cityName) return;
-    
-    const GEOCODING_API_URL = `https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${API_KEY}`;
-    
-    // Fetch entered city coordinates from API response (name, latitude, longitude)
-    fetch(GEOCODING_API_URL)
-        .then(res => res.json())
-        .then(data => {
-            if (!data.length) return alert(`Nothing found for ${cityName}`);
-            console.log(data)
-            const { name, lat, lon } = data[0];
-            getWeatherDetails(name, lat, lon);
-        })
-        .catch(() => {
-            alert("An error occurred while fetching city coordinates");
-        });
-};
 
+// const getCityCoordinates = (e) => {
+//     e.preventDefault();  // Prevents form submission from refreshing the page
+//     const cityName = cityInput.value.trim();
+//     if (!cityName) return;
+    
+//     const GEOCODING_API_URL = `https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${API_KEY}`;
+    
+//     // Fetch entered city coordinates from API response (name, latitude, longitude)
+//     fetch(GEOCODING_API_URL)
+//         .then(res => res.json())
+//         .then(data => {
+//             if (!data.length) return alert(`Nothing found for ${cityName}`);
+//             // console.log(data)
+//             const { name, lat, lon } = data[0];
+//             getWeatherDetails(name, lat, lon);
+//         })
+//         .catch(() => {
+//             alert("An error occurred while fetching city coordinates");
+//         });
+// };
+
+const getUserCoordinates = (event) => {
+    event.preventDefault(); // Prevent form submission
+    navigator.geolocation.getCurrentPosition(
+        position => {
+            const{latitude,longitude}=position.coords;
+            const REVERSE_GEOCODING_URL=`http://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${API_KEY}`;
+
+            //get city coordinates using reverse geocoding api
+            
+            fetch(REVERSE_GEOCODING_URL)
+            .then(res => res.json())
+            .then(data => {
+                const { name } = data[0];
+                getWeatherDetails(name, latitude, longitude);
+            })
+            .catch(() => {
+                alert("An error occurred while fetching city");
+            });
+        },
+        error => {
+            if(error.code===error.PERMISSION_DENIED){
+                alert("Geolocation request denied.Please reset location permission to grant access again.")
+            }
+            
+        }
+    );
+}
+
+
+// window.addEventListener("DOMContentLoaded", loadRecentCities);
+
+// Event listeners
 searchButton.addEventListener("click", getCityCoordinates);
+
+currentLocationButton.addEventListener("click", getUserCoordinates);

@@ -1086,9 +1086,10 @@ video {
 
 /* Media Queries for Responsive Design */
 @media (max-width: 640px) {
-  /* body{
-    height: 100vh;
-  } */
+
+  body{
+    height: 100%;
+  }
     .wrapper {
         margin:0; 
         
@@ -1108,7 +1109,7 @@ video {
 
 @media (min-width: 641px) and (max-width: 1024px) {
   body{
-    height: 100vh;
+    height: 100%;
   }
     .forecast-content {
         min-width: 300px;
@@ -1128,4 +1129,62 @@ video {
         min-width: 300px;
         min-height:300px; /* Minimum width for extra large screens */
     }
+}
+
+.recent-cities-dropdown {
+  position: relative;
+  width: 100%; /* Match input width */
+  max-height: 130px; /* Set max height */
+  overflow-y: auto; /* Enable scrolling */
+  margin-bottom: 10px;
+}
+.recent-cities-dropdown::-webkit-scrollbar {
+  width: 8px; /* Set the width of the scrollbar */
+}
+
+.recent-cities-dropdown::-webkit-scrollbar-track {
+  background: transparent; /* Background of the scrollbar track */
+}
+
+.recent-cities-dropdown::-webkit-scrollbar-thumb {
+  background: rgb(210, 143, 244); /* Color of the scrollbar */
+  border-radius: 10px; /* Round edges of the scrollbar */
+}
+
+.recent-cities-dropdown::-webkit-scrollbar-thumb:hover {
+  background: darkviolet; /* Color on hover */
+}
+
+.recent-cities-dropdown li {
+  padding: 0.5rem 1rem; /* Padding for list items */
+  cursor: pointer; /* Cursor changes to pointer */
+}
+
+.recent-cities-dropdown li:hover {
+  background-color: #f0f0f0; /* Background on hover */
+}
+
+.search-btn{
+  background-color: rgb(188, 7, 234);
+}
+.search-btn:hover{
+  background-color: rgb(219, 149, 238);
+}
+.curr-btn:hover{
+background-color: #d7b1f6;
+
+}
+.temperature{
+  color:rgb(188, 7, 234);
+}
+.icon-weather{
+  background-color: rgb(202, 6, 251);
+}
+
+.forecast-content {
+  background-color: rgba(243, 138, 243, 0.3); /* Adds transparency for the glass effect */
+  backdrop-filter: blur(10px); /* Blurs the background behind the div */
+  box-shadow: 0 8px 32px rgba(70, 3, 67, 0.37); /* 3D shadow effect */
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Light, semi-transparent border */
+
 }
