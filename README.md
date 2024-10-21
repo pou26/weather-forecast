@@ -11,7 +11,10 @@ Wind speed
 Weather condition (e.g., Clear, Rainy, Cloudy)
 Date and time
 Extended 5-day weather forecast with day-wise breakdown.
+
 Project Setup
 Prerequisites
 Node.js installed on your machine.
-npm (comes with Node.js)
+run npm i to install node modules
+install node modules by running npm i
+use live server to run the code in your local server,the correct path should include src/index.html(ex:-http://127.0.0.1:5500/src/index.html);
