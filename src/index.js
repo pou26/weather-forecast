@@ -44,6 +44,7 @@ const getcurrentDate = (weatherItem) => {
 //pressure humidity wind speed
 
 const getForecast = (weatherItem) => {
+
     // Select the pressure, humidity, and wind speed elements
     const pressureDiv = document.querySelector(".pressure");
     const humidityDiv = document.querySelector(".humidity");
@@ -84,6 +85,7 @@ const createWeatherCard = (weatherItem) => {
 
 
 // Add city to local storage for recently searched cities
+
 const addCityToRecentSearches = (cityName) => {
     let recentCities = JSON.parse(localStorage.getItem('recentCities')) || [];
     
@@ -97,6 +99,7 @@ const addCityToRecentSearches = (cityName) => {
 };
 
 // Function to populate the dropdown with recently searched cities
+
 const populateDropdown = () => {
     dropdownMenu.innerHTML = '';  // Clear existing dropdown content
     const recentCities = JSON.parse(localStorage.getItem('recentCities')) || [];
@@ -115,28 +118,33 @@ const populateDropdown = () => {
 };
 
 // Handle city selection from dropdown
+
 const getCityCoordinatesFromDropdown = (cityName) => {
     cityInput.value = cityName;  // Set the input value to the selected city
     getCityCoordinates();  // Fetch weather for the selected city
 };
 
 // Function to fetch city coordinates
+
 const getCityCoordinates = (e) => {
     if (e) e.preventDefault();  // Prevent form submission from refreshing the page
     const cityName = cityInput.value.trim();
-    if (!cityName) return;
+    if (!cityName || cityName==" ") return alert('Error! Search box cannot be empty.');;
 
     const GEOCODING_API_URL = `https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${API_KEY}`;
     
     // Fetch entered city coordinates from API response (name, latitude, longitude)
+
     fetch(GEOCODING_API_URL)
         .then(res => res.json())
         .then(data => {
-            if (!data.length) return alert(`Nothing found for ${cityName}`);
+
+            if (!data.length) return alert(`Invalid! Nothing found for ${cityName}`);
             const { name, lat, lon } = data[0];
             getWeatherDetails(name, lat, lon);
 
             // Add city to recently searched cities
+
             addCityToRecentSearches(name);
             populateDropdown();  // Update the dropdown with new city
         })
@@ -171,10 +179,9 @@ const getWeatherDetails = (cityName, lat, lon) => {
             weatherCardsDiv.innerHTML = "";
             locationName.innerHTML = getLocationName({ name: cityName });
             currentDate.innerHTML = getcurrentDate(fiveDayForecast[0]); // Use the first forecast item for the current date
-            // temperatureDiv.innerHTML = getCurrentDate(fiveDayForecast[0]);
-            // weatherImage.innerHTML = getCurrentDate(fiveDayForecast[0]);
-            
+
             // Populate the pressure, humidity, and wind speed
+
             getForecast(fiveDayForecast[0]); // Use the first forecast for current weather stats
 
             fiveDayForecast.forEach(weatherItem => {
@@ -186,28 +193,7 @@ const getWeatherDetails = (cityName, lat, lon) => {
         });
 };
 
-// Function to fetch city coordinates
 
-// const getCityCoordinates = (e) => {
-//     e.preventDefault();  // Prevents form submission from refreshing the page
-//     const cityName = cityInput.value.trim();
-//     if (!cityName) return;
-    
-//     const GEOCODING_API_URL = `https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${API_KEY}`;
-    
-//     // Fetch entered city coordinates from API response (name, latitude, longitude)
-//     fetch(GEOCODING_API_URL)
-//         .then(res => res.json())
-//         .then(data => {
-//             if (!data.length) return alert(`Nothing found for ${cityName}`);
-//             // console.log(data)
-//             const { name, lat, lon } = data[0];
-//             getWeatherDetails(name, lat, lon);
-//         })
-//         .catch(() => {
-//             alert("An error occurred while fetching city coordinates");
-//         });
-// };
 
 const getUserCoordinates = (event) => {
     event.preventDefault(); // Prevent form submission
@@ -238,7 +224,7 @@ const getUserCoordinates = (event) => {
 }
 
 
-// window.addEventListener("DOMContentLoaded", loadRecentCities);
+
 
 // Event listeners
 searchButton.addEventListener("click", getCityCoordinates);
