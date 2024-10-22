@@ -1,3 +1,5 @@
+github repo-https://github.com/pou26/weather-forecast.git
+
 Weather Forecast App
 This Weather Forecast App provides detailed weather data for different cities using the OpenWeather API. The app displays various weather metrics such as temperature, humidity, pressure, wind speed, weather type, and date. Additionally, it shows a 5-day extended forecast for the selected city.
 
